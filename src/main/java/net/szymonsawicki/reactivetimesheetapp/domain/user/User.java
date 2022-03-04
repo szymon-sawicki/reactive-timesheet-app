@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.dto.GetUserDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.type.Role;
+import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.UserEntity;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +19,16 @@ public class User {
     String password;
     Role role;
     String teamId;
+
+    UserEntity toEntity() {
+        return UserEntity.builder()
+                .id(id)
+                .username(username)
+                .password(password)
+                .role(role)
+                .teamId(teamId)
+                .build();
+    }
 
     GetUserDto toGetUserDto() {
         return new GetUserDto(

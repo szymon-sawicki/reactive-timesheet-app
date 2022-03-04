@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.GetTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
+import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.TeamEntity;
 
 import java.util.List;
 
@@ -19,6 +20,15 @@ public class Team {
     String name;
     User lead;
     List<User> members;
+
+    public TeamEntity toEntity() {
+        return TeamEntity.builder()
+                .id(id)
+                .name(name)
+                .lead(lead)
+                .members(members)
+                .build();
+    }
 
     public GetTeamDto toGetTeamDto() {
         return new GetTeamDto(
