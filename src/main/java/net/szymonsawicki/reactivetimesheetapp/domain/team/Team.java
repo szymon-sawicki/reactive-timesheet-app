@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.GetTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 
 import java.util.List;
@@ -13,8 +14,17 @@ import java.util.List;
 @Builder
 @EqualsAndHashCode
 public class Team {
+
     String id;
     String name;
     User lead;
-    List<User> mambers;
+    List<User> members;
+
+    public GetTeamDto toGetTeamDto() {
+        return new GetTeamDto(
+                id,
+                name,
+                lead,
+                members);
+    }
 }
