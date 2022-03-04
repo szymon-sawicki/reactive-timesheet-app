@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.TimeEntry;
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.type.Category;
+import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -25,6 +26,7 @@ public class TimeEntryEntity {
     LocalDate date;
     LocalTime timeFrom;
     LocalTime timeTo;
+    User user;
     Category category;
     String description;
 
@@ -34,6 +36,7 @@ public class TimeEntryEntity {
                 .date(date)
                 .timeFrom(timeFrom)
                 .timeTo(timeTo)
+                .user(user)
                 .category(category)
                 .description(description)
                 .build();

@@ -6,7 +6,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.dto.GetTimeEntryDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.type.Category;
+import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.TimeEntryEntity;
+import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.UserEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -21,6 +23,7 @@ public class TimeEntry {
     LocalDate date;
     LocalTime timeFrom;
     LocalTime timeTo;
+    User user;
     Category category;
     String description;
 
@@ -30,6 +33,7 @@ public class TimeEntry {
                 .date(date)
                 .timeFrom(timeFrom)
                 .timeTo(timeTo)
+                .user(user)
                 .category(category)
                 .description(description)
                 .build();
@@ -41,6 +45,7 @@ public class TimeEntry {
                 date,
                 timeFrom,
                 timeTo,
+                user,
                 category,
                 description);
     }
