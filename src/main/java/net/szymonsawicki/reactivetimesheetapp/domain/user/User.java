@@ -20,7 +20,7 @@ public class User {
     Role role;
     String teamId;
 
-    UserEntity toEntity() {
+    public UserEntity toEntity() {
         return UserEntity.builder()
                 .id(id)
                 .username(username)
@@ -30,7 +30,7 @@ public class User {
                 .build();
     }
 
-    GetUserDto toGetUserDto() {
+    public GetUserDto toGetUserDto() {
         return new GetUserDto(
                 id,
                 username,

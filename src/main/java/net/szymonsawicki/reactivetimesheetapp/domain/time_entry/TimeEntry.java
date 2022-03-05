@@ -27,7 +27,7 @@ public class TimeEntry {
     Category category;
     String description;
 
-    TimeEntryEntity toEntity() {
+    public TimeEntryEntity toEntity() {
         return TimeEntryEntity.builder()
                 .id(id)
                 .date(date)
@@ -39,7 +39,7 @@ public class TimeEntry {
                 .build();
     }
 
-    GetTimeEntryDto toGetTimeEntryDto() {
+    public GetTimeEntryDto toGetTimeEntryDto() {
         return new GetTimeEntryDto(
                 id,
                 date,

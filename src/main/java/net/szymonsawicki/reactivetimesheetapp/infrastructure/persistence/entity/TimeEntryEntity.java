@@ -26,20 +26,19 @@ public class TimeEntryEntity {
     LocalDate date;
     LocalTime timeFrom;
     LocalTime timeTo;
-    User user;
+    UserEntity user;
     Category category;
     String description;
 
-    TimeEntry toTimeEntry() {
+    public TimeEntry toTimeEntry() {
         return TimeEntry.builder()
                 .id(id)
                 .date(date)
                 .timeFrom(timeFrom)
                 .timeTo(timeTo)
-                .user(user)
+                .user(user.toUser())
                 .category(category)
                 .description(description)
                 .build();
     }
-
 }
