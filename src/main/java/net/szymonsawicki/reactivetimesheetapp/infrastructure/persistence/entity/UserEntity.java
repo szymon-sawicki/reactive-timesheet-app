@@ -24,7 +24,7 @@ public class UserEntity {
     Role role;
     String teamId;
 
-    User toUser() {
+    public User toUser() {
         return User.builder()
                 .id(id)
                 .username(username)

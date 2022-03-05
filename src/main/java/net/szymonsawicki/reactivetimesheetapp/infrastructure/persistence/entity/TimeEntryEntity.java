@@ -41,5 +41,4 @@ public class TimeEntryEntity {
                 .description(description)
                 .build();
     }
-
 }
