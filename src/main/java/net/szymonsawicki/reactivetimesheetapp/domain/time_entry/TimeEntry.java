@@ -33,7 +33,7 @@ public class TimeEntry {
                 .date(date)
                 .timeFrom(timeFrom)
                 .timeTo(timeTo)
-                .user(user)
+                .user(user.toEntity())
                 .category(category)
                 .description(description)
                 .build();

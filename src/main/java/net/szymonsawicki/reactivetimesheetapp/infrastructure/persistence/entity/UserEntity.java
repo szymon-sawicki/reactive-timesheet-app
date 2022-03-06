@@ -24,6 +24,26 @@ public class UserEntity {
     Role role;
     String teamId;
 
+    public User withPassword(String newPassword) {
+        return User.builder()
+                .id(id)
+                .username(username)
+                .password(newPassword)
+                .role(role)
+                .teamId(teamId)
+                .build();
+    }
+
+    public User withTeamId(String newTeamId) {
+        return User.builder()
+                .id(id)
+                .username(username)
+                .password(password)
+                .role(role)
+                .teamId(newTeamId)
+                .build();
+    }
+
     public User toUser() {
         return User.builder()
                 .id(id)
