@@ -4,7 +4,7 @@ import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.type.Role;
 
 public record CreateUserDto(String username, String password, String passwordConfirmation, Role role, String teamId) {
-    User toUser() {
+    public User toUser() {
         return User.builder()
                 .username(username)
                 .password(password)

@@ -60,4 +60,11 @@ public class UserRepositoryImpl implements UserRepository {
         return userDao.findByUsername(username)
                 .flatMap(user -> Mono.just(user.toUser()));
     }
+
+    @Override
+    public Flux<User> saveAll(List<User> users) {
+        return userDao
+                .saveAll(users.stream().map(User::toEntity).toList())
+                .flatMap(userEntity -> Mono.just(userEntity.toUser()));
+    }
 }
