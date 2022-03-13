@@ -2,9 +2,13 @@ package net.szymonsawicki.reactivetimesheetapp.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.szymonsawicki.reactivetimesheetapp.application.service.exception.TeamServiceException;
 import net.szymonsawicki.reactivetimesheetapp.application.service.exception.UserServiceException;
+import net.szymonsawicki.reactivetimesheetapp.domain.team.TeamUtils;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
+import net.szymonsawicki.reactivetimesheetapp.domain.user.UserUtils;
+import net.szymonsawicki.reactivetimesheetapp.domain.user.dto.CreateUserDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.dto.GetUserDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -29,5 +33,20 @@ public class UserService {
                 .map(User::toGetUserDto)
                 .switchIfEmpty(Mono.error(new UserServiceException("username doen't exist")));
     }
+
+    public Mono<GetUserDto> addUser(Mono<CreateUserDto> createUserDtoMono) {
+        return createUserDtoMono
+                .flatMap(createUserDto -> userRepository
+                        .findByUsername(createUserDto.username())
+                        .map(user -> {
+                            log.error("user with username " + createUserDto.username() + " already exists");
+                            return user.toGetUserDto();
+                        })
+                        .switchIfEmpty(createUserDtoMono.flatMap(userDto -> userRepository
+                                .save(userDto.toUser())
+                                .map(User::toGetUserDto)
+                        )));
+    }
+
 
 }

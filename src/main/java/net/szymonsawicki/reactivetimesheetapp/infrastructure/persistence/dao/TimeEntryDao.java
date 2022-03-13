@@ -1,7 +1,5 @@
 package net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.dao;
 
-import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.TimeEntry;
-import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.TimeEntryEntity;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.UserEntity;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
