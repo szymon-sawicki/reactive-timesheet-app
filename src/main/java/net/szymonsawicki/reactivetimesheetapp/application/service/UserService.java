@@ -2,7 +2,6 @@ package net.szymonsawicki.reactivetimesheetapp.application.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.szymonsawicki.reactivetimesheetapp.application.service.exception.TeamServiceException;
 import net.szymonsawicki.reactivetimesheetapp.application.service.exception.UserServiceException;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.TeamUtils;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
@@ -31,7 +30,7 @@ public class UserService {
     public Mono<GetUserDto> findByUsername(String username) {
         return userRepository.findByUsername(username)
                 .map(User::toGetUserDto)
-                .switchIfEmpty(Mono.error(new UserServiceException("username doen't exist")));
+                .switchIfEmpty(Mono.error(new UserServiceException("username doesn't exist")));
     }
 
     public Mono<GetUserDto> addUser(Mono<CreateUserDto> createUserDtoMono) {
@@ -48,5 +47,22 @@ public class UserService {
                         )));
     }
 
-
+    public Mono<GetUserDto> deleteUser(String userId) {
+        return userRepository
+                .findById(userId)
+                .flatMap(user -> {
+                    String teamId = UserUtils.toTeamId.apply(user);
+                    if (teamId != null) {
+                        teamRepository
+                                .findById(teamId)
+                                .flatMap(team -> {
+                                    TeamUtils.toMembers.apply(team).remove(user);
+                                    return teamRepository.save(team);
+                                });
+                    }
+                    userRepository.delete(userId);
+                    return Mono.just(user.toGetUserDto());
+                })
+                .switchIfEmpty(Mono.error(new UserServiceException("cannot find user to delete")));
+    }
 }

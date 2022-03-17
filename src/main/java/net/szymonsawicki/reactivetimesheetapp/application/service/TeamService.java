@@ -49,6 +49,8 @@ public class TeamService {
 
         var teamToInsert = createTeamDto.toTeam();
 
+        // at first team is inserted into db and all its member are updated with the new teamId
+
         return teamRepository
                 .save(teamToInsert)
                 .flatMap(insertedTeam -> {
@@ -57,6 +59,8 @@ public class TeamService {
                             .stream()
                             .map(createUserDto -> createUserDto.toUser().withTeamId(TeamUtils.toId.apply(insertedTeam)))
                             .toList();
+
+                    // then all members with correct teamId are saved into db, flux is converted to list which is used to update team's members. At the end updated team is saved in db.
 
                     return userRepository
                             .saveAll(membersToInsert)
@@ -68,7 +72,28 @@ public class TeamService {
                                         .map(Team::toGetTeamDto);
                             });
                 });
+    }
 
+    public Mono<GetTeamDto> deleteTeam(String teamId) {
+
+        return teamRepository
+                .findById(teamId)
+                .flatMap(team -> {
+
+                    // at first, I'm changing teamId of all team members to null and save it in db
+
+                    var membersToUpdate = TeamUtils.toMembers.apply(team)
+                            .stream()
+                            .map(member -> member.withTeamId(null))
+                            .toList();
+                    userRepository.saveAll(membersToUpdate);
+
+                    // then I'm deleting team and returning mono of DTO
+
+                    teamRepository.delete(TeamUtils.toId.apply(team));
+                    return Mono.just(team.toGetTeamDto());
+                })
+                .switchIfEmpty(Mono.error(new TeamServiceException("cannot find team to delete")));
     }
 
 }

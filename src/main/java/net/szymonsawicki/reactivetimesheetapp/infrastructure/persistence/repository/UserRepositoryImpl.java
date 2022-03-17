@@ -41,14 +41,6 @@ public class UserRepositoryImpl implements UserRepository {
                 .flatMap(userEntity -> Mono.just(userEntity.toUser()));
     }
 
-    @Override
-    public Mono<User> delete(String id) {
-
-        return userDao.findById(id)
-                .flatMap(userEntity -> userDao.delete(userEntity)
-                        .then(Mono.just(userEntity.toUser())))
-                        .switchIfEmpty(Mono.error(new PersistenceException("cannot find user to delete")));
-    }
 
     public Flux<User> findByTeamId(String teamId) {
         return userDao.findByTeamId(teamId)
@@ -66,5 +58,20 @@ public class UserRepositoryImpl implements UserRepository {
         return userDao
                 .saveAll(users.stream().map(User::toEntity).toList())
                 .flatMap(userEntity -> Mono.just(userEntity.toUser()));
+    }
+
+    @Override
+    public Mono<User> delete(String id) {
+
+        return userDao.findById(id)
+                .flatMap(userEntity -> userDao.delete(userEntity)
+                        .then(Mono.just(userEntity.toUser())))
+                .switchIfEmpty(Mono.error(new PersistenceException("cannot find user to delete")));
+    }
+
+    @Override
+    public Mono<Void> deleteAll(List<User> users) {
+        return userDao
+                .deleteAll(users.stream().map(User::toEntity).toList());
     }
 }

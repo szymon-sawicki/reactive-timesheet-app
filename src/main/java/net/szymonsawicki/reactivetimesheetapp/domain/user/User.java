@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import net.szymonsawicki.reactivetimesheetapp.domain.team.Team;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.dto.GetUserDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.type.Role;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.UserEntity;

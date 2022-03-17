@@ -3,6 +3,7 @@ package net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.reposi
 import lombok.RequiredArgsConstructor;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.Team;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
+import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.dao.TeamDao;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.exception.PersistenceException;
 import org.springframework.stereotype.Repository;
