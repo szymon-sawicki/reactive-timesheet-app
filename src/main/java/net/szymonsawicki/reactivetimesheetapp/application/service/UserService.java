@@ -51,6 +51,9 @@ public class UserService {
         return userRepository
                 .findById(userId)
                 .flatMap(user -> {
+
+                    // when teamId is not null then list of members in related team will be updated
+
                     String teamId = UserUtils.toTeamId.apply(user);
                     if (teamId != null) {
                         teamRepository

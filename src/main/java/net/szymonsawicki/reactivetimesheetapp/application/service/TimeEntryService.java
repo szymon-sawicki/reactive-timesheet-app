@@ -42,7 +42,8 @@ public class TimeEntryService {
     private void checkTime(CreateTimeEntryDto timeEntryToCheck) {
         timeEntryRepository.findAllByUserAndDate(timeEntryToCheck.user().toUser(), timeEntryToCheck.date())
                 .filter(timeEntry ->
-                        TimeEntryUtils.toTimeFrom.apply(timeEntry).isAfter(timeEntryToCheck.timeTo()) || TimeEntryUtils.toTimeTo.apply(timeEntry).isBefore(timeEntryToCheck.timeFrom()))
+                        TimeEntryUtils.toTimeFrom.apply(timeEntry).isAfter(timeEntryToCheck.timeTo()) ||
+                                TimeEntryUtils.toTimeTo.apply(timeEntry).isBefore(timeEntryToCheck.timeFrom()))
                 .switchIfEmpty(Mono.error(new TimeEntryServiceException("entry time conflict")));
     }
 }
