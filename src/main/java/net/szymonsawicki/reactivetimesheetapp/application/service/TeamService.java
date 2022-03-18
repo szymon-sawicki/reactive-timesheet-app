@@ -35,14 +35,13 @@ public class TeamService {
     public Mono<GetTeamDto> addTeam(Mono<CreateTeamDto> createTeamDtoMono) {
 
         return createTeamDtoMono
-                .flatMap(createTeamDto -> {
-                    return teamRepository.findByName(createTeamDto.name())
-                            .map(team -> {
-                                log.error("Team with name " + createTeamDto.name() + " already exists");
-                                return team.toGetTeamDto();
-                            })
-                            .switchIfEmpty(createTeamWithMembers(createTeamDto));
-                });
+                .flatMap(createTeamDto -> teamRepository.findByName(createTeamDto.name())
+                        .map(team -> {
+                            log.error("Team with name " + createTeamDto.name() + " already exists");
+                            return team.toGetTeamDto();
+                        })
+                        .switchIfEmpty(createTeamWithMembers(createTeamDto))
+                );
     }
 
     private Mono<GetTeamDto> createTeamWithMembers(CreateTeamDto createTeamDto) {

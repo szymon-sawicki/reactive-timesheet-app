@@ -8,7 +8,6 @@ import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.dto.GetTimeEntry
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.type.Category;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.TimeEntryEntity;
-import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.UserEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -45,7 +44,7 @@ public class TimeEntry {
                 date,
                 timeFrom,
                 timeTo,
-                user,
+                user.toGetUserDto(),
                 category,
                 description);
     }
