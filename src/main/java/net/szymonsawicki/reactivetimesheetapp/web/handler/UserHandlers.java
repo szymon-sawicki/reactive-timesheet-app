@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-public class UserHandler {
+public class UserHandlers {
     private final UserService userService;
 
     public Mono<ServerResponse> findById(ServerRequest serverRequest) {
@@ -27,8 +27,8 @@ public class UserHandler {
     }
 
     public Mono<ServerResponse> createUser(ServerRequest serverRequest) {
-        var createUsertDtoMono = serverRequest.bodyToMono(CreateUserDto.class);
-        return GlobalRoutingHandler.doRequest(userService.addUser(createUsertDtoMono), HttpStatus.CREATED);
+        var createUserDtoMono = serverRequest.bodyToMono(CreateUserDto.class);
+        return GlobalRoutingHandler.doRequest(userService.addUser(createUserDtoMono), HttpStatus.CREATED);
     }
 
     public Mono<ServerResponse> deleteUser(ServerRequest serverRequest) {
