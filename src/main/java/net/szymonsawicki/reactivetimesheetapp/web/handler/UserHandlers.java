@@ -17,7 +17,7 @@ public class UserHandlers {
     private final UserService userService;
 
     public Mono<ServerResponse> findById(ServerRequest serverRequest) {
-        var userId = serverRequest.pathVariable("userId");
+        var userId = serverRequest.pathVariable("id");
         return GlobalRoutingHandler.doRequest(userService.findById(userId), HttpStatus.OK);
     }
 
@@ -32,7 +32,7 @@ public class UserHandlers {
     }
 
     public Mono<ServerResponse> deleteUser(ServerRequest serverRequest) {
-        var userId = serverRequest.pathVariable("userId");
+        var userId = serverRequest.pathVariable("id");
         return GlobalRoutingHandler.doRequest(userService.deleteUser(userId), HttpStatus.OK);
     }
 }

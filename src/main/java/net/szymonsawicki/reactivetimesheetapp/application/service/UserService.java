@@ -37,14 +37,19 @@ public class UserService {
         return createUserDtoMono
                 .flatMap(createUserDto -> userRepository
                         .findByUsername(createUserDto.username())
-                        .map(user -> {
-                            log.error("user with username " + createUserDto.username() + " already exists");
-                            return user.toGetUserDto();
-                        })
-                        .switchIfEmpty(createUserDtoMono.flatMap(userDto -> userRepository
-                                .save(userDto.toUser())
-                                .map(User::toGetUserDto)
-                        )));
+                        .hasElement()
+                        .flatMap(isUserPresent -> Boolean.TRUE.equals(isUserPresent)
+                                ?
+                                Mono.error(new UserServiceException("user with username " + createUserDto.username() + " already exists"))
+                                :
+                                createUser(createUserDto)));
+    }
+
+    private Mono<GetUserDto> createUser(CreateUserDto createUserDto) {
+        var user = createUserDto.toUser();
+        return userRepository
+                .save(user)
+                .map(User::toGetUserDto);
     }
 
     public Mono<GetUserDto> deleteUser(String userId) {
