@@ -18,14 +18,12 @@ public class Team {
 
     String id;
     String name;
-    User lead;
     List<User> members;
 
     public Team withMembers(List<User> newMembers) {
         return Team.builder()
                 .id(id)
                 .name(name)
-                .lead(lead)
                 .members(newMembers)
                 .build();
     }
@@ -34,7 +32,6 @@ public class Team {
         return TeamEntity.builder()
                 .id(id)
                 .name(name)
-                .lead(lead)
                 .members(members)
                 .build();
     }
@@ -43,7 +40,6 @@ public class Team {
         return new GetTeamDto(
                 id,
                 name,
-                lead,
-                members);
+                members.stream().map(User::toGetUserDto).toList());
     }
 }

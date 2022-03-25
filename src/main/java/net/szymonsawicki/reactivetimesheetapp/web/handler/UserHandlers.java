@@ -23,7 +23,7 @@ public class UserHandlers {
 
     public Mono<ServerResponse> findByUsername(ServerRequest serverRequest) {
         var username = serverRequest.pathVariable("username");
-        return GlobalRoutingHandler.doRequest(userService.findById(username), HttpStatus.OK);
+        return GlobalRoutingHandler.doRequest(userService.findByUsername(username), HttpStatus.OK);
     }
 
     public Mono<ServerResponse> createUser(ServerRequest serverRequest) {

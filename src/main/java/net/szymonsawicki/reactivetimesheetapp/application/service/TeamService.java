@@ -89,8 +89,7 @@ public class TeamService {
 
                     // then I'm deleting team and returning mono of DTO
 
-                    teamRepository.delete(TeamUtils.toId.apply(team));
-                    return Mono.just(team.toGetTeamDto());
+                    return teamRepository.delete(teamId).map(Team::toGetTeamDto);
                 })
                 .switchIfEmpty(Mono.error(new TeamServiceException("cannot find team to delete")));
     }

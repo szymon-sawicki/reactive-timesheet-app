@@ -22,14 +22,12 @@ public class TeamEntity {
     String id;
 
     String name;
-    User lead;
     List<User> members;
 
     public Team toTeam() {
         return Team.builder()
                 .id(id)
                 .name(name)
-                .lead(lead)
                 .members(members)
                 .build();
     }
