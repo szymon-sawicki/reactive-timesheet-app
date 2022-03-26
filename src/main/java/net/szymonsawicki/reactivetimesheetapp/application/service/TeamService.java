@@ -79,17 +79,18 @@ public class TeamService {
                 .findById(teamId)
                 .flatMap(team -> {
 
-                    // at first, I'm changing teamId of all team members to null and save it in db
+                    // at first, I'm changing teamId of all team members to null
 
                     var membersToUpdate = TeamUtils.toMembers.apply(team)
                             .stream()
                             .map(member -> member.withTeamId(null))
                             .toList();
-                    userRepository.saveAll(membersToUpdate);
 
-                    // then I'm deleting team and returning mono of DTO
+                    // then I'm saving all updated members, deleting team and returning mono of DTO
 
-                    return teamRepository.delete(teamId).map(Team::toGetTeamDto);
+                    return userRepository.saveAll(membersToUpdate)
+                            .then(teamRepository.delete(teamId))
+                            .then(Mono.just(team.toGetTeamDto()));
                 })
                 .switchIfEmpty(Mono.error(new TeamServiceException("cannot find team to delete")));
     }
