@@ -55,20 +55,25 @@ public class UserService {
     public Mono<GetUserDto> deleteUser(String userId) {
         return userRepository
                 .findById(userId)
-                .flatMap(user -> {
-                    // when teamId is not null then list of members in related team will be updated
-                    String teamId = UserUtils.toTeamId.apply(user);
-                    if (teamId != null) {
-                        return teamRepository
-                                .findById(teamId)
-                                .flatMap(team -> {
-                                    TeamUtils.toMembers.apply(team).remove(user);
-                                    return teamRepository.save(team);
-                                });
-                    })
-                                    .then(userRepository.delete(userId))
-                            .then(Mono.just(user.toGetUserDto());
-
+                .flatMap(user -> userRepository.delete(userId)
+                        .then(deleteMemberFromTeam(user)))
                 .switchIfEmpty(Mono.error(new UserServiceException("cannot find user to delete")));
-                }
+    }
+
+    private Mono<GetUserDto> deleteMemberFromTeam(User member) {
+        var teamId = UserUtils.toTeamId.apply(member);
+
+        if (teamId != null) {
+            return teamRepository
+                    .findById(teamId)
+                    .flatMap(team -> {
+                        TeamUtils.toMembers.apply(team).remove(member);
+                        return teamRepository.save(team)
+                                .flatMap(t -> Mono.just(member.toGetUserDto()));
+                    })
+                    .switchIfEmpty(Mono.error(new UserServiceException("cannot find user's team")));
+        }
+        return Mono.just(member.toGetUserDto());
+    }
+
 }
