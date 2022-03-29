@@ -34,7 +34,7 @@ public class Routing {
                                 .andRoute(GET("/{username}").and(accept(MediaType.APPLICATION_JSON)), userHandlers::findByUsername)
                                 .andRoute(POST("/").and(accept(MediaType.APPLICATION_JSON)), userHandlers::createUser)
                                 .andRoute(DELETE("/{id}").and(accept(MediaType.APPLICATION_JSON)), userHandlers::deleteUser))
-                .andNest(path("/time_entries"),
+                .andNest(path("/time-entries"),
                         RouterFunctions.route(POST("/").and(accept(MediaType.APPLICATION_JSON)), timeEntryHandlers::addTimeEntry));
     }
 }

@@ -9,8 +9,7 @@ import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.type.Category;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.TimeEntryEntity;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,9 +18,8 @@ import java.time.LocalTime;
 public class TimeEntry {
 
     String id;
-    LocalDate date;
-    LocalTime timeFrom;
-    LocalTime timeTo;
+    LocalDateTime timeFrom;
+    LocalDateTime timeTo;
     User user;
     Category category;
     String description;
@@ -29,7 +27,6 @@ public class TimeEntry {
     public TimeEntryEntity toEntity() {
         return TimeEntryEntity.builder()
                 .id(id)
-                .date(date)
                 .timeFrom(timeFrom)
                 .timeTo(timeTo)
                 .user(user.toEntity())
@@ -41,7 +38,6 @@ public class TimeEntry {
     public GetTimeEntryDto toGetTimeEntryDto() {
         return new GetTimeEntryDto(
                 id,
-                date,
                 timeFrom,
                 timeTo,
                 user.toGetUserDto(),

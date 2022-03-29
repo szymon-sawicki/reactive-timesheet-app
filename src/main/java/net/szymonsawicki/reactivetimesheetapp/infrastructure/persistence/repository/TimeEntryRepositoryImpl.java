@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -56,7 +57,7 @@ public class TimeEntryRepositoryImpl implements TimeEntryRepository {
 
     @Override
     public Flux<TimeEntry> findAllByUserAndDate(User user, LocalDate date) {
-        return timeEntryDao.findAllByUserAndDate(user.toEntity(),date)
+        return timeEntryDao.findAllByUserAndDate(user.toEntity(), date)
                 .flatMap(timeEntryEntity -> Mono.just(timeEntryEntity.toTimeEntry()));
     }
 
@@ -64,5 +65,10 @@ public class TimeEntryRepositoryImpl implements TimeEntryRepository {
     public Flux<TimeEntry> findAllByUser(User user) {
         return timeEntryDao.findAllByUser(user.toEntity())
                 .flatMap(timeEntryEntity -> Mono.just(timeEntryEntity.toTimeEntry()));
+    }
+
+    @Override
+    public Mono<Boolean> timeCheck(LocalDateTime dateFrom, LocalDateTime dateTo) {
+        return timeEntryDao.timeCheck(dateFrom, dateTo);
     }
 }
