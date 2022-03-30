@@ -10,8 +10,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -19,7 +17,6 @@ import java.util.List;
 public class TimeEntryRepositoryImpl implements TimeEntryRepository {
     
     private final TimeEntryDao timeEntryDao;
-
 
     @Override
     public Flux<TimeEntry> findAll() {
@@ -56,19 +53,8 @@ public class TimeEntryRepositoryImpl implements TimeEntryRepository {
     }
 
     @Override
-    public Flux<TimeEntry> findAllByUserAndDate(User user, LocalDate date) {
-        return timeEntryDao.findAllByUserAndDate(user.toEntity(), date)
-                .flatMap(timeEntryEntity -> Mono.just(timeEntryEntity.toTimeEntry()));
-    }
-
-    @Override
     public Flux<TimeEntry> findAllByUser(User user) {
         return timeEntryDao.findAllByUser(user.toEntity())
                 .flatMap(timeEntryEntity -> Mono.just(timeEntryEntity.toTimeEntry()));
-    }
-
-    @Override
-    public Mono<Boolean> timeCheck(LocalDateTime dateFrom, LocalDateTime dateTo) {
-        return timeEntryDao.timeCheck(dateFrom, dateTo);
     }
 }

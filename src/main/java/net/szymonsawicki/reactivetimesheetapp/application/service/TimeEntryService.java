@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.szymonsawicki.reactivetimesheetapp.application.service.exception.TimeEntryServiceException;
 import net.szymonsawicki.reactivetimesheetapp.application.service.exception.UserServiceException;
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.TimeEntry;
+import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.TimeEntryUtils;
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.dto.CreateTimeEntryDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.dto.GetTimeEntryDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.time_entry.repository.TimeEntryRepository;
@@ -22,34 +23,33 @@ public class TimeEntryService {
 
     public Mono<GetTimeEntryDto> addTimeEntry(Mono<CreateTimeEntryDto> createTimeEntryDtoMono) {
         return createTimeEntryDtoMono
-                .then(checkEntry(createTimeEntryDtoMono))
-                .flatMap(createTimeEntryDto -> {
-                    return timeEntryRepository.save(createTimeEntryDto.toTimeEntry())
-                            .map(TimeEntry::toGetTimeEntryDto);
-                });
+                .flatMap(this::checkEntry)
+                .flatMap(createTimeEntryDto -> timeEntryRepository.save(createTimeEntryDto.toTimeEntry())
+                        .map(TimeEntry::toGetTimeEntryDto));
     }
 
-    private Mono<CreateTimeEntryDto> checkEntry(Mono<CreateTimeEntryDto> timeEntryToCheck) {
-        return timeEntryToCheck.flatMap(t ->
+    private Mono<CreateTimeEntryDto> checkEntry(CreateTimeEntryDto timeEntryToCheck) {
 
-                // at first check if the user exists
+        return userRepository
+                .findById(timeEntryToCheck.user().id())
+                .hasElement()
+                .flatMap(isUserPresent -> Boolean.TRUE.equals(isUserPresent)
+                        ?
+                        findCollisions(timeEntryToCheck)
+                        :
+                        Mono.error(new UserServiceException("user not exists")));
+    }
 
-                userRepository
-                        .findById(t.user().id())
-                        .hasElement()
-                        .flatMap(isUserPresent -> Boolean.TRUE.equals(isUserPresent)
-                                ?
-                                Mono.just(timeEntryToCheck)
-                                :
-                                Mono.error(new UserServiceException("user not exists")))
-
-                        // then collision check of the time entry
-
-                        .flatMap(entry -> timeEntryRepository.timeCheck(t.timeFrom(), t.timeTo())
-                                .flatMap(result -> result
-                                        ?
-                                        Mono.error(new TimeEntryServiceException("time entry collision"))
-                                        :
-                                        Mono.just(t))));
+    private Mono<CreateTimeEntryDto> findCollisions(CreateTimeEntryDto timeEntryToCheck) {
+        return timeEntryRepository.findAllByUser(timeEntryToCheck.user().toUser())
+                .filter(entry -> !TimeEntryUtils.toTimeFrom.apply(entry).isAfter(timeEntryToCheck.timeTo())
+                        && !TimeEntryUtils.toTimeTo.apply(entry).isBefore(timeEntryToCheck.timeFrom()))
+                .collectList()
+                .flatMap(result -> {
+                    if (result.isEmpty()) {
+                        Mono.error(new TimeEntryServiceException("time entry collision"));
+                    }
+                    return Mono.just(timeEntryToCheck);
+                });
     }
 }
