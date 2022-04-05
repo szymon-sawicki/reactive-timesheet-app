@@ -4,5 +4,5 @@ spring:
   data:
     mongodb:
       database: db_1
-      host: localhost
+      host: mongodb
       port: 27017
