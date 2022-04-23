@@ -46,12 +46,10 @@ public class TeamService {
 
     private Mono<GetTeamDto> createTeamWithMembers(CreateTeamDto createTeamDto) {
 
-        var teamToInsert = createTeamDto.toTeam();
-
         // at first team is inserted into db and all its member are updated with the new teamId
 
         return teamRepository
-                .save(teamToInsert)
+                .save(createTeamDto.toTeam())
                 .flatMap(insertedTeam -> {
                     var membersToInsert = createTeamDto
                             .members()
@@ -64,12 +62,9 @@ public class TeamService {
                     return userRepository
                             .saveAll(membersToInsert)
                             .collectList()
-                            .flatMap(insertedUsers -> {
-                                var teamToInsertWithMembers = insertedTeam.withMembers(insertedUsers);
-                                return teamRepository
-                                        .save(teamToInsertWithMembers)
-                                        .map(Team::toGetTeamDto);
-                            });
+                            .flatMap(insertedUsers -> teamRepository
+                                    .save(insertedTeam.withMembers(insertedUsers))
+                                    .map(Team::toGetTeamDto));
                 });
     }
 
@@ -94,5 +89,4 @@ public class TeamService {
                 })
                 .switchIfEmpty(Mono.error(new TeamServiceException("cannot find team to delete")));
     }
-
 }

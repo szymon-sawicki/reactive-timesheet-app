@@ -38,7 +38,7 @@ public class UserService {
                 .flatMap(createUserDto -> userRepository
                         .findByUsername(createUserDto.username())
                         .hasElement()
-                        .flatMap(isUserPresent -> Boolean.TRUE.equals(isUserPresent)
+                        .flatMap(isUserPresent -> isUserPresent
                                 ?
                                 Mono.error(new UserServiceException("user with username " + createUserDto.username() + " already exists"))
                                 :

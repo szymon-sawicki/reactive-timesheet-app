@@ -33,7 +33,7 @@ public class TimeEntryService {
         return userRepository
                 .findById(timeEntryToCheck.user().id())
                 .hasElement()
-                .flatMap(isUserPresent -> Boolean.TRUE.equals(isUserPresent)
+                .flatMap(isUserPresent -> isUserPresent
                         ?
                         findCollisions(timeEntryToCheck)
                         :
@@ -41,6 +41,9 @@ public class TimeEntryService {
     }
 
     private Mono<CreateTimeEntryDto> findCollisions(CreateTimeEntryDto timeEntryToCheck) {
+
+        // TODO proper implementation of collision check (doesn't work at the moment). Create isAvailable() method in TimeEntry domain class
+
         return timeEntryRepository.findAllByUser(timeEntryToCheck.user().toUser())
                 .filter(entry -> !TimeEntryUtils.toTimeFrom.apply(entry).isAfter(timeEntryToCheck.timeTo())
                         && !TimeEntryUtils.toTimeTo.apply(entry).isBefore(timeEntryToCheck.timeFrom()))

@@ -1,0 +1,165 @@
+{
+  "info": {
+    "_postman_id": "809992e0-63cb-4d98-ae6b-30e259a35348",
+    "name": "Reactive Timesheet App",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get user by id",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"username\" : \"John Test\",\r\n        \"password\" : \"223eded3\",\r\n        \"passwordConfirmation\" : \"223eded3\",\r\n        \"role\" : \"LEAD\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/users/id/62378d381507b40858b58695",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "users",
+            "id",
+            "62378d381507b40858b58695"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get user by name",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"username\" : \"John Test\",\r\n        \"password\" : \"223eded3\",\r\n        \"passwordConfirmation\" : \"223eded3\",\r\n        \"role\" : \"LEAD\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/users/id/62378d381507b40858b58695",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "users",
+            "id",
+            "62378d381507b40858b58695"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create user",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"username\" : \"John Test\",\r\n        \"password\" : \"223eded3\",\r\n        \"passwordConfirmation\" : \"223eded3\",\r\n        \"role\" : \"LEAD\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/users/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "users",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create team",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "delete team",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "delete user",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "creating of the new time entry",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"date\" : \"1999-12-12\",\r\n  \"timeFrom\" : \" \",\r\n  \"timeTo\" : \" \",\r\n  \"user\" : {\r\n    \"username\": \"Arnold Test\",\r\n    \"password\": \"223eded3\",\r\n    \"role\": \"DEVELOPER\"\r\n  },\r\n  \"category\": \"DEVELOPMENT\" \r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/team-entries/",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "team-entries",
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "get team by id",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ]
+}
