@@ -4,8 +4,7 @@ It's simple REST API using Spring Webflux, MongoDB and layered architecture usin
 
 ## How to launch the application ?
 
-Installed Docker and Postman will be needed. At the beginning  ou must download app.zip archive from the root directory in the repository.
-In hte terminal enter command:
+Installed Docker and Postman will be needed. At the beginning ou must download reactive-timesheet-app.zip archive from the root directory in the repository. In hte terminal enter command:
 
 `docker compose up -d --build`
 
