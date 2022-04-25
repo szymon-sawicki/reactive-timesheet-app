@@ -66,9 +66,12 @@ public class TeamServiceTest {
                 .members(List.of(member))
                 .build());
 
-        Mockito.when(userRepository.)
+        Mockito.when(userRepository.findById(id))
+                .thenReturn(memberMono);
+        Mockito.when(teamRepository.findByName(teamName))
+                .thenReturn(Mono.empty());
+
+
     }
-
-
 }
 
