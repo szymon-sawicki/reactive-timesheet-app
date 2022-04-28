@@ -22,13 +22,13 @@ public class TeamEntity {
     String id;
 
     String name;
-    List<User> members;
+    List<UserEntity> members;
 
     public Team toTeam() {
         return Team.builder()
                 .id(id)
                 .name(name)
-                .members(members)
+                .members(members.stream().map(UserEntity::toUser).toList())
                 .build();
     }
 }
