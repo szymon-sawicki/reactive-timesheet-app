@@ -23,23 +23,21 @@ public class TeamService {
     public Mono<GetTeamDto> findById(String teamId) {
         return teamRepository.findById(teamId)
                 .map(Team::toGetTeamDto)
-                .switchIfEmpty(Mono.error(new TeamServiceException("id doesn't exist")));
+                .switchIfEmpty(Mono.error(new TeamServiceException("Team with given id doesn't exist")));
     }
 
     public Mono<GetTeamDto> findByName(String name) {
         return teamRepository.findByName(name)
                 .map(Team::toGetTeamDto)
-                .switchIfEmpty(Mono.error(new TeamServiceException("Username doesn't exist")));
+                .switchIfEmpty(Mono.error(new TeamServiceException("Team with given name doesn't exist")));
     }
 
     public Mono<GetTeamDto> addTeam(Mono<CreateTeamDto> createTeamDtoMono) {
 
         return createTeamDtoMono
                 .flatMap(createTeamDto -> teamRepository.findByName(createTeamDto.name())
-                        .map(team -> {
-                            log.error("Team with name " + createTeamDto.name() + " already exists");
-                            return team.toGetTeamDto();
-                        })
+                        .doOnEach(team -> log.error("Team with name " + createTeamDto.name() + " already exists"))
+                        .map(Team::toGetTeamDto)
                         .switchIfEmpty(createTeamWithMembers(createTeamDto))
                 );
     }
