@@ -11,10 +11,12 @@ import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.UserEntity;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.repository.TeamsRepositoryImpl;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.repository.UserRepositoryImpl;
-import org.hamcrest.Matcher;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,8 +27,6 @@ import reactor.test.StepVerifier;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.any;
-
 @ExtendWith(SpringExtension.class)
 public class TeamServiceTest {
 
@@ -34,29 +34,15 @@ public class TeamServiceTest {
     public static class TeamServiceTestConfiguration {
 
         @MockBean
-        public TeamDao teamDao;
+        public TeamRepository teamRepository;
         @MockBean
-        public UserDao userDao;
+        public UserRepository userRepository;
 
-        @Bean
-        public TeamRepository teamRepository() {
-            return new TeamsRepositoryImpl(teamDao);
-        }
-
-        @Bean
-        public UserRepository userRepository() {
-            return new UserRepositoryImpl(userDao);
-        }
         @Bean
         public TeamService teamService() {
-            return new TeamService(new TeamsRepositoryImpl(teamDao), new UserRepositoryImpl(userDao));
+            return new TeamService(teamRepository, userRepository);
         }
     }
-
-    @Autowired
-    public TeamDao teamDao;
-    @Autowired
-    public UserDao userDao;
 
     @Autowired
     public TeamRepository teamRepository;
@@ -66,40 +52,43 @@ public class TeamServiceTest {
     @Autowired
     public TeamService teamService;
 
-    @Test
-    void shouldReturnTeamWithOneMemberOnGetById() {
+        @Test
+        public void shouldReturnTeamWithOneMemberOnGetById() {
 
-        String id = "21344r23r34";
-        String teamId = "2r872394r578";
-        String teamName = "Some team";
-        String username = "testsusrname";
-        Role role = Role.DEVELOPER;
+            String id = "21344r23r34";
+            String teamId = "2r872394r578";
+            String teamName = "Some team";
+            String username = "testsusrname";
+            Role role = Role.DEVELOPER;
 
-        var member = UserEntity.builder()
-                .username(username)
-                .password("some password")
-                .teamId(teamId)
-                .build();
+            var member = User.builder()
+                    .username(username)
+                    .password("some password")
+                    .teamId(teamId)
+                    .build();
 
-        var memberMono = Mono.just(member);
+            var memberMono = Mono.just(member);
 
-        var teamEntityMono = Mono.just(TeamEntity.builder()
-                .id(teamId)
-                .name(teamName)
-                .members(List.of(member))
-                .build());
+            var teamEntityMono = Mono.just(Team.builder()
+                    .id(teamId)
+                    .name(teamName)
+                    .members(List.of(member))
+                    .build());
 
-        Mockito.when(teamDao.findById(teamId))
-                .thenReturn(teamEntityMono);
-        Mockito.when(userDao.findById(id))
-                .thenReturn(memberMono);
+            Mockito.when(teamRepository.findById(Mockito.anyString()))
+                    .thenReturn(teamEntityMono);
+            Mockito.when(userRepository.findById(id))
+                    .thenReturn(memberMono);
 
-        StepVerifier
-                .create(teamService.findById(id))
-                .expectNextMatches(getTeamDto -> getTeamDto.name().equals(teamName))
-                .expectNextMatches(getTeamDto -> getTeamDto.members().size() == 1)
-                .expectNextMatches(getTeamDto -> getTeamDto.members().get(0).username().equals(username))
-                .verifyComplete();
+            StepVerifier
+                    .create(teamService.findById(id))
+                    .assertNext(team -> {
+                        Assertions.assertThat(team.name().equals(teamName));
+                        Assertions.assertThat(team.members()).hasSize(1);
+                        Assertions.assertThat(team.members().get(0).username()).isEqualTo(username);
+                    })
+                    .verifyComplete();
+        }
     }
-}
+
 
