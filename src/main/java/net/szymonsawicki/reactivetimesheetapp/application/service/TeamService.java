@@ -10,6 +10,7 @@ import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.GetTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -38,8 +39,7 @@ public class TeamService {
                 .flatMap(createTeamDto -> teamRepository.findByName(createTeamDto.name())
                         .doOnEach(team -> log.error("Team with name " + createTeamDto.name() + " already exists"))
                         .map(Team::toGetTeamDto)
-                        .switchIfEmpty(createTeamWithMembers(createTeamDto))
-                );
+                                .switchIfEmpty(Mono.defer(() -> createTeamWithMembers(createTeamDto))));
     }
 
     private Mono<GetTeamDto> createTeamWithMembers(CreateTeamDto createTeamDto) {

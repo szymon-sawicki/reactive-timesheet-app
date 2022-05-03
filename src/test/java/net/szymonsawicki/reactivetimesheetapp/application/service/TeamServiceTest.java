@@ -2,6 +2,7 @@ package net.szymonsawicki.reactivetimesheetapp.application.service;
 
 import net.szymonsawicki.reactivetimesheetapp.application.service.exception.TeamServiceException;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.Team;
+import net.szymonsawicki.reactivetimesheetapp.domain.team.TeamUtils;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.CreateTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.GetTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
@@ -19,10 +20,12 @@ import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -164,6 +167,8 @@ public class TeamServiceTest {
         String username1 = "testsusrname";
         String username2 = "testsusrname2";
 
+        ArgumentCaptor<Team> saveTeamCaptor = ArgumentCaptor.forClass(Team.class);
+
         var member1 = new GetUserDto(
                 userId1,
                 username1,
@@ -202,18 +207,23 @@ public class TeamServiceTest {
 
         Mockito.when(teamRepository.findByName(Mockito.anyString()))
                 .thenReturn(Mono.empty());
-        Mockito.when(teamRepository.save(Mockito.any(Team.class)))
+
+        Mockito.when(teamRepository.save(saveTeamCaptor.capture()))
                 .thenReturn(createdTeamMono);
+
         Mockito.when(userRepository.saveAll(Mockito.any(List.class)))
                 .thenReturn(Flux.just(List.of(savedMember1, savedMember2)));
 
         StepVerifier
                 .create(teamService.addTeam(teamToCreateMono))
                 .assertNext(team -> {
-                    Assertions.assertThat(team.name().equals(teamName));
+                    Assertions.assertThat(team.name()).isEqualTo(teamName);
                     Assertions.assertThat(team.members()).hasSize(2);
                     Assertions.assertThat(team.members().stream().map(GetUserDto::username).toList()).containsAll(List.of(username1, username2));
-                    Assertions.assertThat(team.members().stream().filter(member -> !member.teamId().equals(teamId)).toList().isEmpty());
+                    Assertions.assertThat(team.members().stream().filter(member -> !member.teamId().equals(teamId)).toList()).isEmpty();
+                    // captor assertions
+                    Assertions.assertThat(TeamUtils.toMembers.apply(saveTeamCaptor.getValue())).hasSize(2);
+                    Assertions.assertThat(TeamUtils.toId.apply(saveTeamCaptor.getValue())).isEqualTo(teamId);
                 })
                 .verifyComplete();
     }
@@ -240,6 +250,18 @@ public class TeamServiceTest {
                 "some password",
                 null, null);
 
+        var expectedMember1 = new GetUserDto(
+                userId1,
+                username1,
+                "some password",
+                null, teamId);
+
+        var expectedMember2 = new GetUserDto(
+                userId2,
+                username2,
+                "some password",
+                null, teamId);
+
         var savedMember1 = User.builder()
                 .id(userId1)
                 .username(username1)
@@ -261,7 +283,7 @@ public class TeamServiceTest {
         var expectedTeamDto = new GetTeamDto(
                 teamId,
                 teamName
-                , List.of(member1, member2));
+                , List.of(expectedMember1, expectedMember2));
 
         var existingTeamMono = Mono.just(Team.builder()
                 .id(teamId)
@@ -274,21 +296,14 @@ public class TeamServiceTest {
 
         StepVerifier
                 .create(teamService.addTeam(teamToCreateMono))
-             .expectNext(expectedTeamDto)
-/*                .assertNext(team -> {
-                    Assertions.assertThat(team.name().equals(teamName));
-                    Assertions.assertThat(team.members()).hasSize(2);
-                    Assertions.assertThat(team.members().stream().map(GetUserDto::username).toList()).containsAll(List.of(username1, username2));
-                    Assertions.assertThat(team.members().stream().filter(member -> !member.teamId().equals(teamId)).toList().isEmpty());
-                })*/
+                .expectNext(expectedTeamDto)
                 .verifyComplete();
 
-        Mockito.verify(teamRepository,Mockito.never())
+        Mockito.verify(teamRepository, Mockito.never())
                 .save(Mockito.any());
-        Mockito.verify(userRepository,Mockito.never())
+        Mockito.verify(userRepository, Mockito.never())
                 .saveAll(Mockito.any());
-
     }
-    }
+}
 
 
