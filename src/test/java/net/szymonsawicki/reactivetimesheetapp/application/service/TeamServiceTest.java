@@ -7,25 +7,17 @@ import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.CreateTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.GetTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
+import net.szymonsawicki.reactivetimesheetapp.domain.user.UserUtils;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.dto.GetUserDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.repository.UserRepository;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.type.Role;
-import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.dao.TeamDao;
-import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.dao.UserDao;
-import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.TeamEntity;
-import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.entity.UserEntity;
-import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.repository.TeamsRepositoryImpl;
-import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.repository.UserRepositoryImpl;
 import org.assertj.core.api.Assertions;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
+import org.mockito.Captor;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -35,7 +27,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
-import java.util.Objects;
 
 @ExtendWith(SpringExtension.class)
 public class TeamServiceTest {
@@ -61,6 +52,9 @@ public class TeamServiceTest {
 
     @Autowired
     public TeamService teamService;
+
+    @Captor
+    public ArgumentCaptor<List<User>> usersCaptor;
 
     @Test
     public void shouldReturnTeamWithOneMemberOnGetById() {
@@ -211,8 +205,8 @@ public class TeamServiceTest {
         Mockito.when(teamRepository.save(saveTeamCaptor.capture()))
                 .thenReturn(createdTeamMono);
 
-        Mockito.when(userRepository.saveAll(Mockito.any(List.class)))
-                .thenReturn(Flux.just(List.of(savedMember1, savedMember2)));
+        Mockito.when(userRepository.saveAll(usersCaptor.capture()))
+                .thenReturn(Flux.just(savedMember1, savedMember2));
 
         StepVerifier
                 .create(teamService.addTeam(teamToCreateMono))
@@ -224,6 +218,7 @@ public class TeamServiceTest {
                     // captor assertions
                     Assertions.assertThat(TeamUtils.toMembers.apply(saveTeamCaptor.getValue())).hasSize(2);
                     Assertions.assertThat(TeamUtils.toId.apply(saveTeamCaptor.getValue())).isEqualTo(teamId);
+                    Assertions.assertThat(usersCaptor.getValue()).hasSize(2);
                 })
                 .verifyComplete();
     }
@@ -303,6 +298,62 @@ public class TeamServiceTest {
                 .save(Mockito.any());
         Mockito.verify(userRepository, Mockito.never())
                 .saveAll(Mockito.any());
+    }
+
+    @Test
+    public void ShouldDeleteTeamOnDelete() {
+
+        String userId1 = "21344r23r34";
+        String userId2 = "21344r23r34";
+        String teamId = "2r872394r578";
+        String teamName = "Some team";
+        String username1 = "testsusrname";
+        String username2 = "testsusrname2";
+
+        var existingMember1 = User.builder()
+                .id(userId1)
+                .username(username1)
+                .password("some password")
+                .teamId(teamId)
+                .build();
+
+        var existingMember2 = User.builder()
+                .id(userId2)
+                .username(username2)
+                .password("some password")
+                .teamId(teamId)
+                .build();
+
+        var existingTeam = Team.builder()
+                .id(teamId)
+                .name(teamName)
+                .members(List.of(existingMember1,existingMember2))
+                .build();
+
+        Mockito.when(teamRepository.findById(Mockito.anyString()))
+                .thenReturn(Mono.just(existingTeam));
+
+        Mockito.when(userRepository.saveAll(usersCaptor.capture()))
+                .thenReturn(Flux.just(existingMember1,existingMember2));
+
+        Mockito.when(teamRepository.delete(Mockito.anyString()))
+                .thenReturn(Mono.empty());
+
+        StepVerifier
+                .create(teamService.deleteTeam(teamId))
+                .assertNext(team -> {
+                    Assertions.assertThat(team.name()).isEqualTo(teamName);
+                    Assertions.assertThat(team.members()).hasSize(2);
+                    Assertions.assertThat(team.members().stream().map(GetUserDto::username).toList()).containsAll(List.of(username1, username2));
+                    Assertions.assertThat(team.members().stream().filter(member -> !member.teamId().equals(teamId)).toList()).isEmpty();
+                    // captor assertions
+                    Assertions.assertThat(usersCaptor.getValue()).hasSize(2);
+                    Assertions.assertThat(usersCaptor.getValue().stream().filter(user -> UserUtils.toTeamId.apply(user) != null).toList()).isEmpty();
+                })
+                .verifyComplete();
+
+        Mockito.verify(teamRepository,Mockito.times(1))
+                .delete(teamId);
     }
 }
 
