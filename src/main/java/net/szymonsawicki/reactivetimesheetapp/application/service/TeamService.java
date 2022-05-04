@@ -21,6 +21,11 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
 
+    public Flux<GetTeamDto> findAllTeams() {
+        return teamRepository.findAll()
+                .flatMap(team -> Flux.just(team.toGetTeamDto()));
+    }
+
     public Mono<GetTeamDto> findById(String teamId) {
         return teamRepository.findById(teamId)
                 .map(Team::toGetTeamDto)

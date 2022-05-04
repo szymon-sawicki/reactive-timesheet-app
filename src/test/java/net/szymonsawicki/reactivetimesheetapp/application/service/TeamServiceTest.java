@@ -57,6 +57,76 @@ public class TeamServiceTest {
     public ArgumentCaptor<List<User>> usersCaptor;
 
     @Test
+    public void shouldReturnThreeTeamsOnFindAll() {
+
+        String userId1 = "21344r23r34";
+        String userId2 = "21344r23r34";
+        String teamId1 = "2r872394r578";
+        String teamId2 = "2r872394r578";
+        String teamName1 = "Some team";
+        String teamName2 = "Some team";
+        String username1 = "testsusrname";
+        String username2 = "testsusrname2";
+
+        var member1 = new GetUserDto(
+                userId1,
+                username1,
+                "some password",
+                null, teamId1);
+
+        var member2 = new GetUserDto(
+                userId2,
+                username2,
+                "some password",
+                null, teamId2);
+
+        var expectedTeam1 = new GetTeamDto(
+                teamId1,
+                teamName1,
+                List.of(member1));
+
+        var expectedTeam2 = new GetTeamDto(
+                teamId2,
+                teamName2,
+                List.of(member2));
+
+        var memberFromDb1 = User.builder()
+                .id(userId1)
+                .username(username1)
+                .password("some password")
+                .teamId(teamId1)
+                .build();
+
+        var memberFromDb2 = User.builder()
+                .id(userId2)
+                .username(username2)
+                .password("some password")
+                .teamId(teamId2)
+                .build();
+
+        var teamFromDb1 = Team.builder()
+                .id(teamId1)
+                .name(teamName1)
+                .members(List.of(memberFromDb1))
+                .build();
+
+        var teamFromDb2 = Team.builder()
+                .id(teamId2)
+                .name(teamName2)
+                .members(List.of(memberFromDb2))
+                .build();
+
+        Mockito.when(teamRepository.findAll())
+                .thenReturn(Flux.just(teamFromDb1,teamFromDb2));
+
+        StepVerifier
+                .create(teamService.findAllTeams())
+                .expectNext(expectedTeam1)
+                .expectNext(expectedTeam2)
+                .verifyComplete();
+    }
+
+    @Test
     public void shouldReturnTeamWithOneMemberOnGetById() {
 
         String userId = "21344r23r34";
@@ -354,6 +424,18 @@ public class TeamServiceTest {
 
         Mockito.verify(teamRepository,Mockito.times(1))
                 .delete(teamId);
+    }
+
+    @Test
+    public void shouldReturnErrorOnDeleteWhenNotExist() {
+
+        Mockito.when(teamRepository.findById(Mockito.anyString()))
+                .thenReturn(Mono.empty());
+
+        StepVerifier
+                .create(teamService.deleteTeam("some id"))
+                .expectErrorMatches(error -> error instanceof TeamServiceException && error.getMessage().equals("cannot find team to delete"))
+                .verify();
     }
 }
 
