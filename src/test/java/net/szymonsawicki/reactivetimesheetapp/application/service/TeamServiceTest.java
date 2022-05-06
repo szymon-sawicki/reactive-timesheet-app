@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -291,6 +292,11 @@ public class TeamServiceTest {
                     Assertions.assertThat(usersCaptor.getValue()).hasSize(2);
                 })
                 .verifyComplete();
+
+        InOrder inOrder = Mockito.inOrder(teamRepository,userRepository);
+        inOrder.verify(teamRepository,Mockito.times(1)).save(Mockito.any(Team.class));
+        inOrder.verify(userRepository,Mockito.times(1)).saveAll(Mockito.any());
+        inOrder.verify(teamRepository,Mockito.times(1)).save(Mockito.any(Team.class));
     }
 
     @Test
