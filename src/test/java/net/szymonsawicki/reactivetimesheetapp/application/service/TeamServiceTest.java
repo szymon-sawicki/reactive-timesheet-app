@@ -293,10 +293,14 @@ public class TeamServiceTest {
                 })
                 .verifyComplete();
 
-        InOrder inOrder = Mockito.inOrder(teamRepository,userRepository);
-        inOrder.verify(teamRepository,Mockito.times(1)).save(Mockito.any(Team.class));
-        inOrder.verify(userRepository,Mockito.times(1)).saveAll(Mockito.any());
-        inOrder.verify(teamRepository,Mockito.times(1)).save(Mockito.any(Team.class));
+        InOrder inOrder = Mockito.inOrder(teamRepository, userRepository);
+
+        inOrder.verify(teamRepository, Mockito.times(1)).findByName(teamName);
+        inOrder.verify(teamRepository, Mockito.times(1)).save(Mockito.any(Team.class));
+        inOrder.verify(userRepository, Mockito.times(1)).saveAll(Mockito.any());
+        inOrder.verify(teamRepository, Mockito.times(1)).save(Mockito.any(Team.class));
+
+        Mockito.verifyNoMoreInteractions(teamRepository, userRepository);
     }
 
     @Test
