@@ -45,6 +45,6 @@ public class User {
                 id,
                 username,
                 password,
-                role);
+                role, teamId);
     }
 }

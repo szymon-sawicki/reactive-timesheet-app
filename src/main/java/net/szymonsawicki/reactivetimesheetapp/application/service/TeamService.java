@@ -10,6 +10,7 @@ import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.GetTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -20,28 +21,30 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final UserRepository userRepository;
 
+    public Flux<GetTeamDto> findAllTeams() {
+        return teamRepository.findAll()
+                .flatMap(team -> Flux.just(team.toGetTeamDto()));
+    }
+
     public Mono<GetTeamDto> findById(String teamId) {
         return teamRepository.findById(teamId)
                 .map(Team::toGetTeamDto)
-                .switchIfEmpty(Mono.error(new TeamServiceException("id doesn't exist")));
+                .switchIfEmpty(Mono.error(new TeamServiceException("Team with given id doesn't exist")));
     }
 
     public Mono<GetTeamDto> findByName(String name) {
         return teamRepository.findByName(name)
                 .map(Team::toGetTeamDto)
-                .switchIfEmpty(Mono.error(new TeamServiceException("Username doesn't exist")));
+                .switchIfEmpty(Mono.error(new TeamServiceException("Team with given name doesn't exist")));
     }
 
     public Mono<GetTeamDto> addTeam(Mono<CreateTeamDto> createTeamDtoMono) {
 
         return createTeamDtoMono
                 .flatMap(createTeamDto -> teamRepository.findByName(createTeamDto.name())
-                        .map(team -> {
-                            log.error("Team with name " + createTeamDto.name() + " already exists");
-                            return team.toGetTeamDto();
-                        })
-                        .switchIfEmpty(createTeamWithMembers(createTeamDto))
-                );
+                        .doOnEach(team -> log.error("Team with name " + createTeamDto.name() + " already exists"))
+                        .map(Team::toGetTeamDto)
+                                .switchIfEmpty(Mono.defer(() -> createTeamWithMembers(createTeamDto))));
     }
 
     private Mono<GetTeamDto> createTeamWithMembers(CreateTeamDto createTeamDto) {
