@@ -11,6 +11,7 @@ public class AppMongoDbContainer extends MongoDBContainer {
     public static synchronized MongoDBContainer getInstance() {
         if (container == null) {
             container = new AppMongoDbContainer()
+                    .withEnv("MONGO_DB_HOST", "mongodb")
                     .withExposedPorts(27017);
         }
         return container;
@@ -23,6 +24,9 @@ public class AppMongoDbContainer extends MongoDBContainer {
     @Override
     public void start() {
         super.start();
+        System.setProperty("spring.data.mongodb.host", container.getHost());
+        System.setProperty("spring.data.mongodb.port", String.valueOf(container.getBoundPortNumbers()));
+        System.setProperty("spring.data.mongodb.database", "db_1");
     }
 
     @Override

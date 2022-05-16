@@ -1,6 +1,5 @@
 package net.szymonsawicki.reactivetimesheetapp.application.service;
 
-import net.szymonsawicki.reactivetimesheetapp.application.service.utils.AppMongoDbContainer;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.Team;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.TeamUtils;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
@@ -9,34 +8,28 @@ import net.szymonsawicki.reactivetimesheetapp.domain.user.repository.UserReposit
 import net.szymonsawicki.reactivetimesheetapp.domain.user.type.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.List;
 
 
 @SpringBootTest
-@Testcontainers
+@AutoConfigureDataMongo
+// @Testcontainers
+// @DataMongoTest
 public class TeamServiceTest {
-
+/*
     @Container
-    private static final MongoDBContainer MONGO_DB_CONTAINER = AppMongoDbContainer.getInstance();
-
-    @DynamicPropertySource
-    static void setProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.data.mongodb.uri", MONGO_DB_CONTAINER::getReplicaSetUrl);
-        registry.add("spring.data.mongodb.port", MONGO_DB_CONTAINER::getPortBindings);
-        registry.add("spring.data.mongodb.host", () -> "mongodb");
-    }
+    private static final MongoDBContainer MONGO_DB_CONTAINER = AppMongoDbContainer.getInstance();*/
 
     @Autowired
     private TeamRepository teamRepository;
     @Autowired
-    public UserRepository userRepository;
+    private UserRepository userRepository;
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Test
     void shouldReturnTeamOnGetById() {

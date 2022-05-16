@@ -4,5 +4,9 @@ spring:
   data:
     mongodb:
       database: db_1
-      host: mongodb
+      host: localhost
       port: 27017
+
+  mongodb:
+    embedded:
+      version: 3.6.5
