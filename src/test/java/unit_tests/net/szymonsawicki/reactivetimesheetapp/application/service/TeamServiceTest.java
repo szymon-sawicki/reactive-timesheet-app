@@ -1,5 +1,6 @@
-package net.szymonsawicki.reactivetimesheetapp.application.service;
+package unit_tests.net.szymonsawicki.reactivetimesheetapp.application.service;
 
+import net.szymonsawicki.reactivetimesheetapp.application.service.TeamService;
 import net.szymonsawicki.reactivetimesheetapp.application.service.exception.TeamServiceException;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.Team;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.TeamUtils;
@@ -118,7 +119,7 @@ public class TeamServiceTest {
                 .build();
 
         Mockito.when(teamRepository.findAll())
-                .thenReturn(Flux.just(teamFromDb1,teamFromDb2));
+                .thenReturn(Flux.just(teamFromDb1, teamFromDb2));
 
         StepVerifier
                 .create(teamService.findAllTeams())
@@ -407,14 +408,14 @@ public class TeamServiceTest {
         var existingTeam = Team.builder()
                 .id(teamId)
                 .name(teamName)
-                .members(List.of(existingMember1,existingMember2))
+                .members(List.of(existingMember1, existingMember2))
                 .build();
 
         Mockito.when(teamRepository.findById(Mockito.anyString()))
                 .thenReturn(Mono.just(existingTeam));
 
         Mockito.when(userRepository.saveAll(usersCaptor.capture()))
-                .thenReturn(Flux.just(existingMember1,existingMember2));
+                .thenReturn(Flux.just(existingMember1, existingMember2));
 
         Mockito.when(teamRepository.delete(Mockito.anyString()))
                 .thenReturn(Mono.empty());
@@ -432,7 +433,7 @@ public class TeamServiceTest {
                 })
                 .verifyComplete();
 
-        Mockito.verify(teamRepository,Mockito.times(1))
+        Mockito.verify(teamRepository, Mockito.times(1))
                 .delete(teamId);
     }
 
