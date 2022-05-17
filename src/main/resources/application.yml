@@ -1,11 +1,8 @@
 spring:
   application:
     name: reactive-timesheet-app
-  #  data:
-  #      database: db_1
-  #      host: localhost
-  #      port: 27017
-
-  mongodb:
-    embedded:
-      version: 3.4.5
+  data:
+    mongodb:
+      database: db_1
+      host: localhost
+      port: 27017
