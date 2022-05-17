@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: reactive-timesheet-app
+  data:
+    mongodb:
+      database: db_1
+      host: localhost
+      port: 27017
