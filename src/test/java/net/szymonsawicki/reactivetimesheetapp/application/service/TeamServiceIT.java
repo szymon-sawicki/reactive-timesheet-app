@@ -3,14 +3,16 @@ package net.szymonsawicki.reactivetimesheetapp.application.service;
 import net.szymonsawicki.reactivetimesheetapp.application.service.utils.TimesheetAppMongoDbContainer;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.Team;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.TeamUtils;
+import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.GetTeamDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.repository.UserRepository;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.type.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.MongoDBContainer;
@@ -23,7 +25,7 @@ import java.util.List;
 
 @SpringBootTest
 @Testcontainers
-@WebFluxTest
+@AutoConfigureWebTestClient
 @ActiveProfiles("test")
 public class TeamServiceIT {
     @Container
@@ -34,7 +36,7 @@ public class TeamServiceIT {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private WebTestClient WebTestClient;
+    private WebTestClient webClient;
 
     @Test
     void shouldReturnTeamOnGetById() {
@@ -59,6 +61,12 @@ public class TeamServiceIT {
         var insertedTeam = teamRepository.save(team);
 
         var insertedTeamId = TeamUtils.toId.apply(insertedTeam.block());
+
+        webClient.get().uri("/teams/id/{id}", insertedTeamId)
+                .header(HttpHeaders.ACCEPT, "application/json")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(GetTeamDto.class);
 
         StepVerifier.create(teamRepository.findById(insertedTeamId))
                 .expectNextMatches(t -> TeamUtils.toMembers.apply(t).size() == 1)
