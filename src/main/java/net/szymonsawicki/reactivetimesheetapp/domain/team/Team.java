@@ -32,7 +32,7 @@ public class Team {
         return TeamEntity.builder()
                 .id(id)
                 .name(name)
-                .members(members.stream().map(User::toEntity).toList())
+                .members(members == null ? null : members.stream().map(User::toEntity).toList())
                 .build();
     }
 

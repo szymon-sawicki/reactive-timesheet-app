@@ -44,7 +44,7 @@ public class TeamService {
                 .flatMap(createTeamDto -> teamRepository.findByName(createTeamDto.name())
                         .doOnEach(team -> log.error("Team with name " + createTeamDto.name() + " already exists"))
                         .map(Team::toGetTeamDto)
-                                .switchIfEmpty(Mono.defer(() -> createTeamWithMembers(createTeamDto))));
+                        .switchIfEmpty(Mono.defer(() -> createTeamWithMembers(createTeamDto))));
     }
 
     private Mono<GetTeamDto> createTeamWithMembers(CreateTeamDto createTeamDto) {

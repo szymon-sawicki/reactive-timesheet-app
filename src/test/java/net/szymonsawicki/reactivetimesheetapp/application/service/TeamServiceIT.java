@@ -1,7 +1,6 @@
 package net.szymonsawicki.reactivetimesheetapp.application.service;
 
 import net.szymonsawicki.reactivetimesheetapp.application.service.exception.TeamServiceException;
-import net.szymonsawicki.reactivetimesheetapp.application.service.utils.TimesheetAppMongoDbContainer;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.Team;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.TeamUtils;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.dto.CreateTeamDto;
@@ -13,16 +12,19 @@ import net.szymonsawicki.reactivetimesheetapp.domain.user.dto.GetUserDto;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.repository.UserRepository;
 import net.szymonsawicki.reactivetimesheetapp.domain.user.type.Role;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.test.StepVerifier;
 
@@ -34,8 +36,13 @@ import java.util.List;
 @AutoConfigureWebTestClient
 @ActiveProfiles("test")
 public class TeamServiceIT {
-    @Container
+
+   /* @ClassRule
     private static final MongoDBContainer MONGO_DB_CONTAINER = TimesheetAppMongoDbContainer.getInstance();
+*/
+
+    private static final MongoDBContainer MONGO_DB_CONTAINER =
+            new MongoDBContainer("mongo:4.2.8");
 
     @Autowired
     private TeamRepository teamRepository;
@@ -44,7 +51,23 @@ public class TeamServiceIT {
     @Autowired
     private WebTestClient webClient;
 
-    // TODO clear db after each method (deleteAll method must be implemented
+    @BeforeEach
+    void clearDb() {
+        userRepository.deleteAll();
+        teamRepository.deleteAll();
+    }
+
+    @BeforeAll
+    static void setUpAll() {
+        MONGO_DB_CONTAINER.start();
+    }
+
+    @AfterAll
+    static void tearDownAll() {
+        if (!MONGO_DB_CONTAINER.isShouldBeReused()) {
+            MONGO_DB_CONTAINER.stop();
+        }
+    }
 
     @Test
     void shouldReturnTeamOnGetById() {
@@ -90,21 +113,21 @@ public class TeamServiceIT {
                 .expectBodyList(TeamServiceException.class);
     }
 
-
     @Test
+    @DirtiesContext
     void shouldCreateTeamWithTwoMembersOnCreate() {
 
-        String teamName = "Some test team";
+        String teamName = "Some test team2";
         String username1 = "testsusrname1";
         String username2 = "testsusrname2";
-        String password1 = "sdcvdfvbgdf";
-        String password2 = "xlöifxdl.";
+        String password1 = "kongamafonga";
+        String password2 = "kupaladupa.";
         Role role = Role.DEVELOPER;
 
-        var member1 = new GetUserDto(username1, password1, password1, role, teamName);
-        var member2 = new GetUserDto(username2, password2, password2, role, teamName);
+        var member1 = new GetUserDto(null, username1, password1, role, null);
+        //      var member2 = new GetUserDto(null, username2, password2, role, null);
 
-        var createTeamDto = new CreateTeamDto(teamName, List.of(member1, member2));
+        var createTeamDto = new CreateTeamDto(teamName, List.of(member1));
 
         webClient.post().uri("/teams/")
                 .header(HttpHeaders.ACCEPT, "application/json")
@@ -119,6 +142,50 @@ public class TeamServiceIT {
                     Assertions.assertThat(TeamUtils.toMembers.apply(t).size()).isEqualTo(2);
                     Assertions.assertThat(TeamUtils.toMembers.apply(t).stream().map(UserUtils.toUsername).toList())
                             .containsAll(List.of(username1, username2));
+                })
+                .verifyComplete();
+
+        var insertedTeamId = TeamUtils.toId.apply(teamRepository.findByName(teamName).block());
+
+        StepVerifier.create(userRepository.findByUsername(username1))
+                .expectNextMatches(user -> UserUtils.toTeamId.apply(user).equals(insertedTeamId))
+                .verifyComplete();
+
+        StepVerifier.create(userRepository.findByUsername(username2))
+                .expectNextMatches(user -> UserUtils.toTeamId.apply(user).equals(insertedTeamId))
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldReturnExistingTeamOnCreateWhenNameTaken() {
+
+        String teamName = "Some test team2";
+        String username1 = "testsusrname1";
+        String password1 = "sdcvdfvbgdf";
+        Role role = Role.DEVELOPER;
+
+        var team = Team.builder()
+                .name(teamName)
+                .members(null)
+                .build();
+
+        var insertedTeam = teamRepository.save(team);
+
+        var member1 = new GetUserDto(null, username1, password1, role, null);
+
+        var createTeamDto = new CreateTeamDto(teamName, List.of(member1));
+
+        webClient.post().uri("/teams/")
+                .header(HttpHeaders.ACCEPT, "application/json")
+                .body(BodyInserters.fromValue(createTeamDto))
+                .exchange()
+                .expectStatus().is2xxSuccessful()
+                .expectBodyList(TeamServiceException.class);
+
+        StepVerifier.create(teamRepository.findByName(teamName))
+                .assertNext(t -> {
+                    Assertions.assertThat(TeamUtils.toName.apply(t)).isEqualTo(teamName);
+                    //                  Assertions.assertThat(TeamUtils.toMembers.apply(t).size()).isZero();
                 })
                 .verifyComplete();
     }

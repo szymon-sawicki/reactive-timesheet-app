@@ -53,6 +53,11 @@ public class TimeEntryRepositoryImpl implements TimeEntryRepository {
     }
 
     @Override
+    public Mono<Void> deleteAll() {
+        return timeEntryDao.deleteAll();
+    }
+
+    @Override
     public Flux<TimeEntry> findAllByUser(User user) {
         return timeEntryDao.findAllByUser(user.toEntity())
                 .flatMap(timeEntryEntity -> Mono.just(timeEntryEntity.toTimeEntry()));

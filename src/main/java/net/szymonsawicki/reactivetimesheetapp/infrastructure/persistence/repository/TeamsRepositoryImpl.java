@@ -3,7 +3,6 @@ package net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.reposi
 import lombok.RequiredArgsConstructor;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.Team;
 import net.szymonsawicki.reactivetimesheetapp.domain.team.repository.TeamRepository;
-import net.szymonsawicki.reactivetimesheetapp.domain.user.User;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.dao.TeamDao;
 import net.szymonsawicki.reactivetimesheetapp.infrastructure.persistence.exception.PersistenceException;
 import org.springframework.stereotype.Repository;
@@ -49,6 +48,11 @@ public class TeamsRepositoryImpl implements TeamRepository {
                 .flatMap(teamEntity -> teamDao.delete(teamEntity)
                         .then(Mono.just(teamEntity.toTeam())))
                 .switchIfEmpty(Mono.error(new PersistenceException("cannot find team to delete")));
+    }
+
+    @Override
+    public Mono<Void> deleteAll() {
+        return teamDao.deleteAll();
     }
 
     public Mono<Team> findByName(String name) {

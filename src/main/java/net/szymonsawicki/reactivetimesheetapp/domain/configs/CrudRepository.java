@@ -13,5 +13,7 @@ public interface CrudRepository<T, ID> {
     Mono<T> save(T t);
     Mono<T> delete(ID id);
 
+    Mono<Void> deleteAll();
+
 
 }

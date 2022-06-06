@@ -74,4 +74,9 @@ public class UserRepositoryImpl implements UserRepository {
         return userDao
                 .deleteAll(users.stream().map(User::toEntity).toList());
     }
+
+    @Override
+    public Mono<Void> deleteAll() {
+        return userDao.deleteAll();
+    }
 }
