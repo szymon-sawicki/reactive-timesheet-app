@@ -1,5 +1,4 @@
 import React from "react";
-import CreateUserDto from "../model/CreateUserDto";
 
 class CreateUserComponent extends React.Component {
     constructor(props) {
@@ -33,8 +32,45 @@ class CreateUserComponent extends React.Component {
         let value = target.value;
         const {name} = target;
 
-         // TODO
+        if (name === 'username') {
+            if (value.length < 5) {
+                this.setState({
+                    usernameErrorMessage: 'Name should have at least 5 characters',
+                    isNameError: true,
+                    isFormValid: false
+                })
+            } else {
+                this.setState({
+                    usernameErrorMessage: '',
+                    isUsernameError: false
+                })
+            }
+        }
 
+        if (name === 'password') {
+            const passwordRegex = "^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$";
+
+            if (!value.test(passwordRegex)) {
+                this.setState({
+                    passwordErrorMessage: 'password does not matches the policy',
+                    isPasswordError: true,
+                    isFormValid: false
+                })
+            }
+        }
+
+        if (name === 'passwordConfirmation') {
+            if (value !== this.state.password) {
+                this.setState({
+                    passwordErrorMessage: 'password and confirmation does not matches',
+                    isPasswordError: true,
+                    isFormValid: false
+                })
+            }
+        }
+
+        this.setState({[name]: value});
+        this.setState({[`${nameTouched}`]: true});
     }
 
     clearFields = () => {
