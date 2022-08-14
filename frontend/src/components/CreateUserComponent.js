@@ -58,8 +58,6 @@ const CreateUserComponent = () => {
     const roles = ['', 'DEVELOPER', 'LEAD'];
     const [selectedRole, setSelectedRole] = useState('');
 
-    const teamsFromApi = useAxiosGet("http://localhost:8080/teams");
-
     const teams = ['', 'Team 1', 'Team 2', 'Team 3'];  // TODO implement fetching of teams
     const [selectedTeam, setSelectedTeam] = useState('');
 
@@ -122,7 +120,7 @@ const CreateUserComponent = () => {
 
     const useAxiosGet = (url) => {
         const [data, setData] = useState(null);
-        const [error, setError] = useState("");
+        const [axiosError, setAxiosError] = useState("");
         const [loaded, setLoaded] = useState(false);
 
         useEffect(() => {
@@ -135,8 +133,11 @@ const CreateUserComponent = () => {
         return [data, error, loaded];
     }
 
+    const teamsFromApi = useAxiosGet("http://localhost:8080/teams");
+
     return (
         <div className="container">
+            <div className="header"><h2>Create user</h2></div>
             <div className="row">
                 <div className="col-8 mt-5">
                     <form onSubmit={handleSubmit}>
@@ -148,7 +149,7 @@ const CreateUserComponent = () => {
                                 {...bindUsername}
                             /><br/>
                             {
-                                !error.userName && touchedUsername &&
+                                !error.username && touchedUsername &&
                                 <label className="text-danger">Username error</label>
                             }
                         </div>
