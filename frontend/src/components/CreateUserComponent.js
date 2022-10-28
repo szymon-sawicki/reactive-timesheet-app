@@ -58,10 +58,6 @@ const CreateUserComponent = () => {
     const roles = ['', 'DEVELOPER', 'LEAD'];
     const [selectedRole, setSelectedRole] = useState('');
 
-    const teams = ['', 'Team 1', 'Team 2', 'Team 3'];  // TODO implement fetching of teams
-    const [selectedTeam, setSelectedTeam] = useState('');
-
-
     const [error, setError] = useState({
         userName: false,
         password: false,
@@ -107,7 +103,6 @@ const CreateUserComponent = () => {
         setTouchedUsername(false);
         setTouchedPassword(false);
         setTouchedPasswordConfirmation(false);
-        setTouchedPasswordConfirmation(false);
     }
 
     const handleTeamsChange = (event) => {
@@ -127,13 +122,16 @@ const CreateUserComponent = () => {
             axios
                 .get(url)
                 .then((response) => setData(response.data))
-                .catch((error) => setError(error))
+                .catch((err) => setAxiosError(err))
                 .finally(() => setLoaded(true))
         }, []);
-        return [data, error, loaded];
+        return [data, axiosError, loaded];
     }
 
-    const teamsFromApi = useAxiosGet("http://localhost:8080/teams");
+    const teamsFromApi = useAxiosGet("http://localhost:8080/teams/");
+
+    const teams = ['', 'Team 1', 'Team 2', 'Team 3'];  // TODO implement fetching of teams
+    const [selectedTeam, setSelectedTeam] = useState('');
 
     return (
         <div className="container">
@@ -205,6 +203,11 @@ const CreateUserComponent = () => {
                         </div>
                         <div className="form-group">
                             <button disabled={!isValid()} type="submit">Send</button>
+                        </div>
+                        <div>
+                            {
+                                teamsFromApi.map(team => team.toString())
+                            }
                         </div>
                     </form>
                 </div>
